@@ -1,0 +1,102 @@
+Copyright (c) 2011-2013 Cellrox Ltd.
+
+
+**** What is this demo? *****
+
+This is an uber-simplified demo use case of device namespaces. The demo uses
+a secondary device namespace on an Android phone to place the phone "on hold"
+while the screen alternates among a delightful palette of colors. Visually it
+looks like a mere screensaver, but unlike a screensaver, the primary container
+is switched to a non-active namespace and does not have access to any physical
+device.
+
+We provide this use case with the hope that it will serve as sample code for
+other uses of device namespaces. We will be glad to hear about other exciting
+use cases and refer to them from this site.
+
+
+***** How does it work? *****
+
+The demo employs two device namespaces: the primary (root namespace) runs
+Android, and a secondary runs a program that displays the palette. Upon
+request, it switches to the secondary namespace, and then listens to input
+events to perform a switch back to the primary namespace.
+
+This demo has 4 components:
+- devns: service that accepts and executes requests for namespace switch.
+- devns_init: init process of the secondary namespace, displays the palette.
+- devns_switch: a CLI utility to request a switch to secondary namespace.
+- DevnsDemo: an Android application to request a namespace switch via GUI.
+
+The service 'devns' starts at boot time. It first forks the secondary device
+namespace and executes 'devns_init' there. The two programs communicate over
+a pipe. Then it creates a FIFO and listens to request to switch.
+
+When started, 'devns_init' waits for a switching notification from 'devns'.
+When notified, it starts drawing the palette, while waiting for an input event
+(e.g. touch-screen or a button), and then requests to switch back via the FIFO.
+
+Note: 'devns_init' could also draw continuously to the screen, and the device
+namespace would ensure that the output would be seen only when the secondary
+namespace is active. We use an explicit notification purposely to avoid loading
+the CPU unnecessarily.
+
+The application DevnsDemo provides a GUI to request a namespace switch, and
+the utility 'devns_switch' provides CLI (usable via ADB) for the same purpose.
+
+
+***** How to use this demo? *****
+
+This demo was made for AOSP 4.2.2 emulator (goldfish-x86). For instructions
+how to download AOSP, see: http://source.android.com/source/downloading.html.
+After you download the AOSP, follow the instructions below:
+
+1. Apply the device namespace patches to the AOSP kernel sources, and compile
+the kernel. For instructions, see:
+https://www.github.comm/Cellrox/devns-patches/wiki/DeviceNamespace:Patches
+
+ -> This will generate a kernel with device namespaces enabled for AOSP.
+
+2. Apply the devns-demo patch by running devns-patch.sh at the root of the
+AOSP source tree.
+
+ -> This will patch:
+    build/target/product/core.mk
+    system/core/rootdir/init.rc
+
+2. Clone the devns-demo git repository at the root of an Android source tree:
+   $ git clone https://github.com/Cellrox/devns-demo.git
+
+ -> This will create the folder "devns-demo":
+    devns-demo/devns - native components
+	devns-demo/DevnsDemo - demo switch application
+
+4. Compile the Android sources to create a ROM. For instructions on how to
+compile AOSP, see: http://source.android.com/source/building-running.html.
+
+5. Boot the ROM, with the emulator:
+  $ emulator -show-kernel -kernel PATH_TO_COMPILED_KENREL
+
+6. Android will boot with two device namespaces: the primary runs Android,
+and a secondary runs 'devns_init' program that paints the display in changing
+colors. You can switch between them:
+
+ -> Switch to secondary via GUI:   Start the application "Devns Switch Demo",
+    and click "switch to secondary namespace", -or-
+
+ -> Switch to secondary via CLI: "adb shell devns_switch 1"
+
+ These will switch to secondary devns, which will show colors changing.
+
+ -> Switch back to primary:  click on the screen, or use vol-down button
+
+ This will restore the Android in the primary namespace.
+
+7. Enjoy exploring device namespaces
+
+
+***** How to get in touch? *****
+
+Contact us at mailto:oss@cellrox.com
+Developer contacts: {orenl,amir} =at= cellrox.com
+
