@@ -64,12 +64,12 @@ AOSP source tree.
     build/target/product/core.mk
     system/core/rootdir/init.rc
 
-2. Clone the devns-demo git repository at the root of an Android source tree:
+3. Clone the devns-demo git repository at the root of an Android source tree:
    $ git clone https://github.com/Cellrox/devns-demo.git
 
  -> This will create the folder "devns-demo":
     devns-demo/devns - native components
-	devns-demo/DevnsDemo - demo switch application
+    devns-demo/DevnsDemo - demo switch application
 
 4. Compile the Android sources to create a ROM. For instructions on how to
 compile AOSP, see: http://source.android.com/source/building-running.html.
